@@ -1,0 +1,5 @@
+library(devtools)
+library(roxygen2)
+roxygen2::roxygenize("/home/sunjaihe/Desktop/SgsAnnDataV2")
+check("/home/sunjaihe/Desktop/SgsAnnDataV2")
+build("/home/sunjaihe/Desktop/SgsAnnDataV2")

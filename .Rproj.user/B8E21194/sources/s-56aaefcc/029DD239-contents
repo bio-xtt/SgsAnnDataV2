@@ -1,0 +1,33 @@
+Package: SgsAnndata2023
+Type: Package
+Title: A package for converting the mainstream single-cell format to anndata
+Version: 0.2.0
+Author: person(given = "xtt",
+           role = c("aut", "cre"),
+           email = "xtt199239@email.swu.edu.cn")
+Maintainer: xtt <xtt@gmail.com>
+Description: A package for converting the mainstream single-cell analysis tool(Seurat, ArchR, Signac, Giotto) format to anndata
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: false
+Imports: 
+    jsonlite, 
+    anndata,
+    utils,
+    SummarizedExperiment, 
+    GenomicRanges,
+    ArchR,
+    Seurat, 
+    Matrix,
+    Signac,
+    dplyr,
+    Giotto,
+    magick,
+    imager,
+    png,
+    methods
+Depends: R (>= 3.5.0)
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+RoxygenNote: 7.2.3.9000
