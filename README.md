@@ -10,26 +10,30 @@ Currently, SgsAnnDataV2 can only be installed through GitHub. However, we are ac
 devtools::install_github("bio-xtt/SgsAnnDataV2")
 ```
 
-
-#### Example1
-Convert scRNA Seurat object into AnnData, this automatically generates RNA.h5ad and SCT.h5ad respectively in the output folder
+## Usage
+### Seurat to AnnData
+### Single-Cell Transcriptome Object Conversion
+When Seurat contains multiple assays, users can provide multi assay names they wish to export. This will automatically generates the h5ad for each assay type, like RNA.h5ad,integration.h5ad etc. 
 ```
+library(Seurat)
+library(anndata)
 SeuratToAnndata(object=scRNA,
                 outpath="/test_adata",
                 assays=c("RNA", "SCT"),
                 groups = NULL,
-                reductions = NULL,
+                reductions = c("tsne","umap"),
                 markersDF = list("RNA"=rna_marker_df, "SCT"=sct_marker_df)) 
 ```
-
-#### Example2
+### Spatial Transcriptome Object Conversion
 Convert Spatial Seurat object into AnnData, this automatically generates RNA.h5ad and Spatial.h5ad respectively in the output folder
+
+When converting spatial transcriptomic data, we automatically determine the spatial data type based on the object's structure. We return the corresponding **h5ad** file based on the identified type. The spatial coordinates are stored within **adata.obsm['spatial']**. If the analyzed object includes spatially organized slice information, we store it in **adata.uns['spatial']**. Multiple slices are differentiated using different **"library_id"**, ensuring clear distinction between them.
 ```
 SeuratToAnndata(object=scRNA,
                 outpath="/test_adata",
                 assays=c("RNA", "Spatial"),
-                groups = NULL,
-                reductions = NULL,
+                groups = c("seurat_clusters", "region"),
+                reductions = "tsne",
                 markersDF = list("RNA"=rna_marker_df, "Spatial"=st_marker_df)) 
 ```
 
@@ -46,8 +50,12 @@ SeuratToAnndata(object=scATAC,
                 export_links = TRUE,  # to export coaccess link 
                 export_pwm = TRUE)   # to export motif pwm 
 ```
+### Siganac to Anndata
 
-#### Example4
+
+
+
+### ArchR to adata
 Convert ArchR object into AnnData, this automatically generates RNA.h5ad, Peaks.h5ad and Motif.h5ad respectively in the output folder
 ```
 ArchrToAnndata(object=project5,
