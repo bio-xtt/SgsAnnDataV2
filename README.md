@@ -62,7 +62,7 @@ ArchrToAnndata(object=project5,
                export_pwm =TRUE) 
 ```
 
-#### Giotto to AnnData
+### Giotto to AnnData
 Similar to Seurat's conversion of spatial transcriptomic analysis results, we seamlessly incorporate tissue slices and spatial coordinates from Giotto object into the output h5ad object by default.
 ```
 giottoToAnnData(object = giotto,
