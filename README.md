@@ -1,5 +1,9 @@
 # SgsAnnDataV2
-A package used to convert Seurat, Giotto, Signac, ArchR analysis object into AnnData format 
+SgsAnnDataV2 is an R package that facilitates the seamless conversion of single-cell analysis object from popular tools such as Seurat, Giotto, Signac, and ArchR into the AnnData. This format can be directly visualized in SGS which is an interactive browser for single-cell and spatial multimodal datasets.
+
+
+
+
 
 #### Example1
 Convert scRNA Seurat object into AnnData, this automatically generates RNA.h5ad and SCT.h5ad respectively in the output folder
