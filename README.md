@@ -1,12 +1,15 @@
 # SgsAnnDataV2
 SgsAnnDataV2 is an R package that facilitates the seamless conversion of single-cell analysis object from popular tools such as Seurat, Giotto, Signac, and ArchR into the AnnData. This format can be directly visualized in SGS which is an interactive browser for single-cell and spatial multimodal datasets.
 
+> ## Warning
+> Please note that the usage of SGS requires the prior installation of R packages such as Seurat, Giotto, Signac, and anndata. It is important to ensure that these packages are installed beforehand for smooth execution of SGS workflows.
+
 ## Installation
 Currently, SgsAnnDataV2 can only be installed through GitHub. However, we are actively working on providing a BiocManager installation method in the near future. 
 ```
 devtools::install_github("bio-xtt/SgsAnnDataV2")
 ```
-> Please note that the usage of SGS requires the prior installation of R packages such as Seurat, Giotto, Signac, and anndata. It is important to ensure that these packages are installed beforehand for smooth execution of SGS workflows.
+
 
 #### Example1
 Convert scRNA Seurat object into AnnData, this automatically generates RNA.h5ad and SCT.h5ad respectively in the output folder
