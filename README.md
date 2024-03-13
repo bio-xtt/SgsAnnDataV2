@@ -36,7 +36,7 @@ SeuratToAnndata(object=scRNA,
                 markersDF = list("RNA"=rna_marker_df, "Spatial"=st_marker_df)) 
 ```
 
-### Siganac to Anndata
+### Signac to Anndata
 We recommend exporting **peak matrix**, **genescore matrix**, and **motif matrix** from single-cell ATAC data analysis as h5ad files. If desired, these files can be further converted into [**Mudata**](https://mudata.readthedocs.io/en/latest/), which offers a comprehensive and annotated multimodal dataset structure. Additionally, users can use **export_pwm** to output results from co-accessibility analysis and motif enrichment analysis, respectively. Users can access motif-related information via **adata.uns.["motifs"]**.
 ```
 SignacToAnndata(object=scATAC,
