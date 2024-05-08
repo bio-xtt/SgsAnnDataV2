@@ -1,7 +1,7 @@
-Package: SgsAnndata2023
+Package: SgsAnndata
 Type: Package
 Title: A package for converting the mainstream single-cell format to anndata
-Version: 0.2.0
+Version: 0.3.0
 Author: person(given = "xtt",
            role = c("aut", "cre"),
            email = "xtt199239@email.swu.edu.cn")
@@ -22,6 +22,7 @@ Imports:
     Signac,
     dplyr,
     Giotto,
+    GiottoUtils,
     magick,
     imager,
     png,
