@@ -78,7 +78,7 @@ SeuratToAnndata <- function(object,
   # Get cell meta data
   cell_meta <- object[[]]
   cell_meta$`cell_idex` <- as.vector(seq(rownames(cell_meta)))
-  if (groups && groups %in% colnames(cell_meta)) {
+  if (!is.null(groups) && groups %in% colnames(cell_meta)) {
     groups <- append(groups, "cell_idex")
     cell_meta <- cell_meta[, groups]
   }
@@ -93,10 +93,10 @@ SeuratToAnndata <- function(object,
     ReducNames <- intersect(reductions, names(dr))
     if (length(ReducNames) == 0) {
       stop("the reduction name provided not in the object")
-    } else {
-      ReducNames <- names(dr)
-      message("Using all embeddings contained in the object: ", paste(ReducNames, collapse = ", "))
     }
+  } else {
+    ReducNames <- names(dr)
+    message("Using all embeddings contained in the object: ", paste(ReducNames, collapse = ", "))
   }
 
   for (embedding in ReducNames) {
@@ -205,9 +205,9 @@ SeuratToAnndata <- function(object,
       dir.create(outpath)
     }
 
-
     # Write h5ad
     file_path <- file.path(outpath, sprintf("%s.h5ad", assays[i]))
-    adata$write_h5ad(file_path)
+    #adata$write_h5ad(file_path)
+    anndata::write_h5ad(adata, file_path)
   }
 }

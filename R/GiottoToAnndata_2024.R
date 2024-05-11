@@ -84,7 +84,6 @@ set_default_spat_unit <- function(gobject,
 #' @return expression matrix
 #' @family expression accessor functions
 #' @family functions to get data from giotto object
-#' @export
 get_expression_values <- function(gobject,
                                   values = NULL,
                                   spat_unit = NULL,
@@ -372,5 +371,6 @@ giottoToAnnData <- function(object = NULL,
   }
 
   ### write the adata into h5ad
-  adata$write_h5ad(outpath)
+  # adata$write_h5ad(outpath)
+  anndata::write_h5ad(adata, file_path)
 }

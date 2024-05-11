@@ -43,11 +43,12 @@ ArchrToAnndata <- function(object,
     ReducNames <- intersect(reductions, names(dr))
     if (length(ReducNames) == 0) {
       stop("the reduction name provided not in the object")
-    } else {
-      ReducNames <- names(dr)
-      message("Using all embeddings contained in the object: ", paste(ReducNames, collapse = ", "))
     }
+  } else {
+    ReducNames <- names(dr)
+    message("Using all embeddings contained in the object: ", paste(ReducNames, collapse = ", "))
   }
+
   for (embedding in ReducNames) {
     emb <- ArchR::getEmbedding(ArchRProj = object, embedding = embedding, returnDF = TRUE)
     colnames(emb) <- c(sprintf("X_%s", embedding), sprintf("Y_%s", embedding))
@@ -146,6 +147,7 @@ ArchrToAnndata <- function(object,
 
     # Write h5ad
     file_path <- file.path(outpath, sprintf("%s.h5ad", assays[i]))
-    exp_adata$write_h5ad(file_path)
+    #exp_adata$write_h5ad(file_path)
+    anndata::write_h5ad(exp_adata, file_path)
   }
 }
