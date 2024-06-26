@@ -284,7 +284,7 @@ giottoToAnnData <- function(object = NULL,
 
   if (!is.null(spatial_locs)) {
     spatial_locs <- getNoshiftSpatialLocs(object)
-    spatial_locs$sdimy <- abs(spatial_locs$`sdimy`)
+    # spatial_locs$sdimy <- abs(spatial_locs$`sdimy`)
     spatial_locs <- as.matrix(spatial_locs)
     adata$obsm[["spatial"]] <- spatial_locs
   } else {
@@ -372,5 +372,5 @@ giottoToAnnData <- function(object = NULL,
 
   ### write the adata into h5ad
   # adata$write_h5ad(outpath)
-  anndata::write_h5ad(adata, file_path)
+  anndata::write_h5ad(adata, outpath)
 }
