@@ -271,7 +271,6 @@ giottoToAnnData <- function(object = NULL,
     message("raw_x information fetech failed, please make sure it is not null! ")
   }
 
-  print(1)
 
   spatial_locs <- Giotto::getSpatialLocations(object,
     spat_unit = NULL,
@@ -291,7 +290,6 @@ giottoToAnnData <- function(object = NULL,
     message("spatial_locs information fetech failed, please make sure it is not null! ")
   }
 
-  print(2)
 
   if (!is.null(object@`dimension_reduction`)) {
     dr <- object@`dimension_reduction`$`cells`$`cell`$`rna`
@@ -317,7 +315,6 @@ giottoToAnnData <- function(object = NULL,
     message("dimension_reduction is null!")
   }
 
-  print(3)
 
   if (!is.null(object@`largeImages`)) {
     dr <- object@`largeImages`
@@ -352,7 +349,6 @@ giottoToAnnData <- function(object = NULL,
     message("images is null! we can only extract spatial scatter info!")
   }
 
-  print(4)
 
   if (is.character(markerDF)) {
     if (file.exists(markerDF)) {
@@ -365,7 +361,7 @@ giottoToAnnData <- function(object = NULL,
     }
   } else if (exists("markerDF")) {
     marker_data <- as.data.frame(markerDF)
-    adata$uns[["marker"]] <- marker_data
+    adata$uns[["markers"]] <- marker_data
   } else {
     stop("invalid var")
   }
