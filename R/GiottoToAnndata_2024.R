@@ -367,6 +367,5 @@ giottoToAnnData <- function(object = NULL,
   }
 
   ### write the adata into h5ad
-  # adata$write_h5ad(outpath)
   anndata::write_h5ad(adata, outpath)
 }
