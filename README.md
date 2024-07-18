@@ -1,5 +1,5 @@
-# SgsAnndata
-SgsAnndata is an R package that facilitates the seamless conversion of single-cell analysis object from popular tools such as Seurat, Giotto, Signac, and ArchR into the AnnData. This format can be directly visualized in SGS which is an interactive browser for single-cell and spatial multimodal datasets.
+# SgsAnnData
+SgsAnnData is an R package that facilitates the seamless conversion of single-cell analysis object from popular tools such as Seurat, Giotto, Signac, and ArchR into the AnnData. This format can be directly visualized in SGS which is an interactive browser for single-cell and spatial multimodal datasets.
 
 ![](https://211.bioinfotoolkits.net:10290/sgs/website/feature_4.png)
 
