@@ -7,7 +7,7 @@ SgsAnndata is an R package that facilitates the seamless conversion of single-ce
 > Please note that the usage of SGS requires the prior installation of R packages such as Seurat, Giotto, Signac, and anndata. It is important to ensure that these packages are installed beforehand for smooth execution of SGS workflows.
 
 ## Installation
-Currently, SgsAnndata can only be installed through GitHub. However, we are actively working on providing a BiocManager installation method in the near future. 
+Currently, SgsAnndata can only be installed through GitHub. However, we are actively working on providing a Bioconductor installation method in the near future. 
 ```
 devtools::install_github("bio-xtt/SgsAnnDataV2")
 ```
