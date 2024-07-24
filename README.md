@@ -72,7 +72,8 @@ giottoToAnnData(object = giotto,
                 markerDF = NULL)
 ```
 
-
+## Citiation
+Xia, T., Sun, J., Lu, F., Luo, Y., Mao, Y., Xu, L., & Wang, Y. (2024). Empowering Integrative and Collaborative Exploration of Single-Cell and Spatial Multimodal Data with SGS. bioRxiv, (), 2024.07.19.604227. Accessed July 23, 2024. https://doi.org/10.1101/2024.07.19.604227.
 
 
 
