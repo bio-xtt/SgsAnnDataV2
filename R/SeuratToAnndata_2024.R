@@ -150,37 +150,41 @@ SeuratToAnndata <- function(object,
 
     # Add coords informations
     dr <- object@`reductions`
-    if (length(dr) >= 1) {
+    !is.null(reductions){
+      ReducNames <- intersect(reductions, names(dr))
+      if (length(ReducNames) == 0) {
+      stop("the reduction name provided not in the object")
+    }
+    } else {
       ReducNames <- names(dr)
       message("Using all embeddings contained in the object: ", paste(ReducNames, collapse = ", "))
-      for (embedding in ReducNames) {
-        if (assays[i] == object@reductions[[embedding]]@`assay.used`) {
-          emb <- Seurat::Embeddings(object = object, embedding)
-          if (ncol(emb) > 2) {
-            emb <- emb[, 1:2]
-          }
-          colnames(emb) <- c(sprintf("X_%s", embedding), sprintf("Y_%s", embedding))
-          # coords_list[[embedding]] <- as.matrix(emb)
-          adata$obsm[[embedding]] <- as.matrix(emb)
-        } else if (nrow(Seurat::Embeddings(object = object, embedding)) == ncol(object@`assays`[[assays[i]]])) {
-            
-          emb <- Seurat::Embeddings(object = object, embedding)
-          if (ncol(emb) > 2) {
-            emb <- emb[, 1:2]
-          }
-          colnames(emb) <- c(sprintf("X_%s", embedding), sprintf("Y_%s", embedding))
-          # coords_list[[embedding]] <- as.matrix(emb)
-          adata$obsm[[embedding]] <- as.matrix(emb)
-            
-        } else {
-          message("The dimensionality reduction coordinates are not computed from this matrix")
-          break
-        }
-      }
-        
-    } else {
-      stop("no reduction messeges found in  the object")
     }
+    message("Using all embeddings contained in the object: ", paste(ReducNames, collapse = ", "))
+    for (embedding in ReducNames) {
+    if (assays[i] == object@reductions[[embedding]]@`assay.used`) {
+        emb <- Seurat::Embeddings(object = object, embedding)
+        if (ncol(emb) > 2) {
+          emb <- emb[, 1:2]
+        }
+        colnames(emb) <- c(sprintf("X_%s", embedding), sprintf("Y_%s", embedding))
+        # coords_list[[embedding]] <- as.matrix(emb)
+        adata$obsm[[embedding]] <- as.matrix(emb)
+      } else if (nrow(Seurat::Embeddings(object = object, embedding)) == ncol(object@`assays`[[assays[i]]])) {  
+        emb <- Seurat::Embeddings(object = object, embedding)
+        if (ncol(emb) > 2) {
+          emb <- emb[, 1:2]
+        }
+        colnames(emb) <- c(sprintf("X_%s", embedding), sprintf("Y_%s", embedding))
+        # coords_list[[embedding]] <- as.matrix(emb)
+        adata$obsm[[embedding]] <- as.matrix(emb)
+            
+      } else {
+        message("The dimensionality reduction coordinates are not computed from this matrix")
+        break
+      }
+    }
+        
+
     
 
     # Add spatial informations if exist
