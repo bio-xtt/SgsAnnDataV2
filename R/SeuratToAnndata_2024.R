@@ -1,5 +1,5 @@
 ## This script used to cover seurat object into anndata object
-## 2024.4.30
+## 2024.12.10
 
 #' Function used to parser spatial informs of different ST-seq
 #' @param object Seurat object
@@ -22,11 +22,27 @@ Gain_spatial <- function(object, img.name, adata) {
     )
     img_arrary <- object@`images`[[img.name]]@`image`
     adata$uns[["spatial"]][[img.name]][["images"]][["lowres"]] <- img_arrary * 255
+    adata$uns[["spatial"]][[img.name]][["scalefactors"]] <- scale_list  
+    
+  } else if (class(object[[img.name]]) == "VisiumV2"){
+    # spatial_coords <- GetTissueCoordinates(object = object@images[[img.name]])[,c("x","y")]
+    spatial_coords <- GetTissueCoordinates(object = object@images[[img.name]])[,c("y","x")]
+    scale <-  as.list(Seurat::ScaleFactors(object[[img.name]]))
+    scale_list <- list(
+      "tissue_hires_scalef" = scale$`hires`,
+      "tissue_lowres_scalef" = scale$`lowres`,
+      "fiducial_diameter_fullres" = scale$`fiducial`,
+      "spot_diameter_fullres" = scale$`spot`)
+    img_arrary <- object@`images`[[img.name]]@`image`
+    adata$uns[["spatial"]][[img.name]][["images"]][["lowres"]] <- img_arrary * 255
     adata$uns[["spatial"]][[img.name]][["scalefactors"]] <- scale_list
+      
   } else if (class(object[[img.name]]) == "SlideSeq") {
     spatial_coords <- Seurat::GetTissueCoordinates(object = object, image = img.name)[, c("y", "x")]
+      
   } else if (class(object[[img.name]]) == "STARmap") {
     spatial_coords <- Seurat::GetTissueCoordinates(object = object, image = img.name)[, c("y", "x")]
+      
   } else if (class(object@`images`[[img.name]]) == "FOV") {
     spatial_coords <- Seurat::GetTissueCoordinates(object = object[[img.name]], which = "centroids")
     rownames(spatial_coords) <- spatial_coords$`cell`
@@ -37,6 +53,7 @@ Gain_spatial <- function(object, img.name, adata) {
       ### add the segamnet data into uns
       adata$uns[["spatial"]][[img.name]][["images"]][["Segmentation_coords"]] <- Segmentation_coords
     }
+      
   } else {
     stop("Spatial information fetch failed")
   }
@@ -63,7 +80,6 @@ Gain_spatial <- function(object, img.name, adata) {
 #' @importFrom utils packageVersion
 #' @export
 #'
-
 SeuratToAnndata <- function(object,
                             outpath,
                             assays,
@@ -78,6 +94,8 @@ SeuratToAnndata <- function(object,
   # Get cell meta data
   cell_meta <- object[[]]
   cell_meta$`cell_idex` <- as.vector(seq(rownames(cell_meta)))
+  # remove NA column
+  cell_meta =  cell_meta[, apply(cell_meta, 2, function(y) any(!is.na(y)))]
   if (!is.null(groups) && groups %in% colnames(cell_meta)) {
     groups <- append(groups, "cell_idex")
     cell_meta <- cell_meta[, groups]
@@ -86,29 +104,7 @@ SeuratToAnndata <- function(object,
   cell_meta$`cell_id` <- rownames(cell_meta)
 
 
-  # Get cell embedding
-  coords_list <- list()
-  dr <- object@`reductions`
-  if (!is.null(reductions)) {
-    ReducNames <- intersect(reductions, names(dr))
-    if (length(ReducNames) == 0) {
-      stop("the reduction name provided not in the object")
-    }
-  } else {
-    ReducNames <- names(dr)
-    message("Using all embeddings contained in the object: ", paste(ReducNames, collapse = ", "))
-  }
-
-  for (embedding in ReducNames) {
-    emb <- Seurat::Embeddings(object = object, embedding)
-    if (ncol(emb) > 2) {
-      emb <- emb[, 1:2]
-    }
-    colnames(emb) <- c(sprintf("X_%s", embedding), sprintf("Y_%s", embedding))
-    coords_list[[embedding]] <- as.matrix(emb)
-  }
-
-
+                                 
   # Export assays
   for (i in seq_along(assays)) {
     Seurat::DefaultAssay(object) <- assays[i]
@@ -117,14 +113,16 @@ SeuratToAnndata <- function(object,
     ## Attension the exp data fetch method between seurat v3 ~ seurat v5
     if (class(object@assays[[i]]) == "Assay") {
       if (!is.null(object@assays[[i]]@`data`)) {
+        exp <- Seurat::GetAssayData(object = object, assay = assays[i], slot = "data")
         adata <- anndata::AnnData(
-          X = Matrix::t(Seurat::GetAssayData(object = object, assay = assays[i], slot = "data")),
+          X = Matrix::t(exp),
           obs = cell_meta,
           var = feature_meta
         )
       } else {
+        exp <- Seurat::GetAssayData(object = object, assay = assays[i], slot = "counts")
         adata <- anndata::AnnData(
-          X = Matrix::t(Seurat::GetAssayData(object = object, assay = assays[i], slot = "counts")),
+          X = Matrix::t(exp),
           obs = cell_meta,
           var = feature_meta
         )
@@ -133,14 +131,16 @@ SeuratToAnndata <- function(object,
       options(Seurat.object.assay.version = "v5")
 
       if (!is.null(object@assays[[i]]@`layers`[["data"]])) {
+        exp <- Seurat::GetAssayData(object = object, assay = assays[i], layer = "data")
         adata <- anndata::AnnData(
-          X = Matrix::t(Seurat::GetAssayData(object = object, assay = assays[i], layer = "data")),
+          X = Matrix::t(exp),
           obs = cell_meta,
           var = feature_meta
         )
       } else {
+        exp <- Seurat::GetAssayData(object = object, assay = assays[i], layer = "counts")
         adata <- anndata::AnnData(
-          X = Matrix::t(Seurat::GetAssayData(object = object, assay = assays[i], layer = "counts")),
+          X = Matrix::t(exp),
           obs = cell_meta,
           var = feature_meta
         )
@@ -149,13 +149,42 @@ SeuratToAnndata <- function(object,
 
 
     # Add coords informations
-    for (eb in ReducNames) {
-      adata$obsm[[eb]] <- coords_list[[eb]]
+    dr <- object@`reductions`
+    if (length(dr) >= 1) {
+      ReducNames <- names(dr)
+      message("Using all embeddings contained in the object: ", paste(ReducNames, collapse = ", "))
+      for (embedding in ReducNames) {
+        if (assays[i] == object@reductions[[embedding]]@`assay.used`) {
+          emb <- Seurat::Embeddings(object = object, embedding)
+          if (ncol(emb) > 2) {
+            emb <- emb[, 1:2]
+          }
+          colnames(emb) <- c(sprintf("X_%s", embedding), sprintf("Y_%s", embedding))
+          # coords_list[[embedding]] <- as.matrix(emb)
+          adata$obsm[[embedding]] <- as.matrix(emb)
+        } else if (nrow(Seurat::Embeddings(object = object, embedding)) == ncol(object@`assays`[[assays[i]]])) {
+            
+          emb <- Seurat::Embeddings(object = object, embedding)
+          if (ncol(emb) > 2) {
+            emb <- emb[, 1:2]
+          }
+          colnames(emb) <- c(sprintf("X_%s", embedding), sprintf("Y_%s", embedding))
+          # coords_list[[embedding]] <- as.matrix(emb)
+          adata$obsm[[embedding]] <- as.matrix(emb)
+            
+        } else {
+          message("The dimensionality reduction coordinates are not computed from this matrix")
+          break
+        }
+      }
+        
+    } else {
+      stop("no reduction messeges found in  the object")
     }
-
+    
 
     # Add spatial informations if exist
-    if (length(Images(object = object, assay = assays[i])) > 0) {
+    if (!is.null(Seurat::Images(object = object, assay = assays[i])) && length(Images(object = object, assay = assays[i])) > 0) {
       images <- Seurat::Images(object = object, assay = assays[i])
     } else {
       images <- Seurat::Images(object = object)
@@ -178,7 +207,24 @@ SeuratToAnndata <- function(object,
       adata <- result[["adata"]]
       adata$obsm[["spatial"]] <- as.matrix(all_coords)
       adata$obs[["library_id"]] <- library_ids$`library_id`
-    } else if (length(imageNames) >= 1) {
+    } else if (length(imageNames) >= 1 && class(object[[imageNames[1]]]) == "VisiumV2") {
+        # "VisiumV2"
+        all_coords <- data.frame()
+        library_ids <- data.frame()
+        for (img in imageNames) {
+          result <- Gain_spatial(object = object, img.name = img, adata = adata)
+          spatial_coords <- result[["sp_coords"]]
+          all_coords <- rbind(spatial_coords, all_coords)
+          library_id <- result[["library_id"]]
+          library_ids <- rbind(library_id, library_ids)
+        }
+        adata <- result[["adata"]]
+        ## filter the object
+        all_coords <- all_coords[rownames(adata$`obs`), ]
+        library_ids <- library_ids[rownames(adata$`obs`), ]
+        adata$obsm[["spatial"]] <- as.matrix(all_coords)
+        adata$obs[["library_id"]] <- library_ids$`library_id`
+      } else if (length(imageNames) >= 1) {
       for (img_names in imageNames) {
         result <- Gain_spatial(object = object, img.name = img_names, adata = adata)
       }
