@@ -150,7 +150,7 @@ SeuratToAnndata <- function(object,
 
     # Add coords informations
     dr <- object@`reductions`
-    !is.null(reductions){
+   if( !is.null(reductions)) {
       ReducNames <- intersect(reductions, names(dr))
       if (length(ReducNames) == 0) {
       stop("the reduction name provided not in the object")
