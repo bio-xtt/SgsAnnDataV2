@@ -188,60 +188,64 @@ SeuratToAnndata <- function(object,
     
 
     # Add spatial informations if exist
-    if (!is.null(Seurat::Images(object = object, assay = assays[i])) && length(Images(object = object, assay = assays[i])) > 0) {
-      images <- Seurat::Images(object = object, assay = assays[i])
-    } else {
-      images <- Seurat::Images(object = object)
-    }
+    if ("images" %in% slotNames(object)) {
+        images <- Seurat::Images(object = object, assay = assays[i])
+      } else {
+        print("no images")
+        images <- NULL
+      }
+    
     imageNames <- images
-
-    if (length(imageNames) >= 1 && class(object[[imageNames[1]]]) == "VisiumV1") {
-      # Merged all spatial coords
-      all_coords <- data.frame()
-      library_ids <- data.frame()
-      for (img in imageNames) {
-        result <- Gain_spatial(object = object, img.name = img, adata = adata)
-        spatial_coords <- result[["sp_coords"]]
-        all_coords <- rbind(spatial_coords, all_coords)
-        library_id <- result[["library_id"]]
-        library_ids <- rbind(library_id, library_ids)
-      }
-      all_coords <- all_coords[rownames(object[[]]), ]
-      library_ids <- library_ids[rownames(object[[]]), ]
-      adata <- result[["adata"]]
-      adata$obsm[["spatial"]] <- as.matrix(all_coords)
-      adata$obs[["library_id"]] <- library_ids$`library_id`
-    } else if (length(imageNames) >= 1 && class(object[[imageNames[1]]]) == "VisiumV2") {
-        # "VisiumV2"
-        all_coords <- data.frame()
-        library_ids <- data.frame()
-        for (img in imageNames) {
-          result <- Gain_spatial(object = object, img.name = img, adata = adata)
+    if (length(imageNames) >= 1) {
+        ## judge the images information
+        if (class(object[[imageNames[1]]]) == "VisiumV1") {
+          # Merged all spatial coords
+          all_coords <- data.frame()
+          library_ids <- data.frame()
+          for (img in imageNames) {
+            result <- Gain_spatial(object = object, img.name = img, adata = adata)
+            spatial_coords <- result[["sp_coords"]]
+            all_coords <- rbind(spatial_coords, all_coords)
+            library_id <- result[["library_id"]]
+            library_ids <- rbind(library_id, library_ids)
+          }
+          all_coords <- all_coords[rownames(object[[]]), ]
+          library_ids <- library_ids[rownames(object[[]]), ]
+          adata <- result[["adata"]]
+          adata$obsm[["spatial"]] <- as.matrix(all_coords)
+          adata$obs[["library_id"]] <- library_ids$`library_id`
+        } else if (class(object[[imageNames[1]]]) == "VisiumV2") {
+          # "VisiumV2"
+          all_coords <- data.frame()
+          library_ids <- data.frame()
+          for (img in imageNames) {
+            result <- Gain_spatial(object = object, img.name = img, adata = adata)
+            spatial_coords <- result[["sp_coords"]]
+            all_coords <- rbind(spatial_coords, all_coords)
+            library_id <- result[["library_id"]]
+            library_ids <- rbind(library_id, library_ids)
+          }
+          adata <- result[["adata"]]
+          ## filter the object
+          all_coords <- all_coords[rownames(adata$`obs`), ]
+          library_ids <- library_ids[rownames(adata$`obs`), ]
+          adata$obsm[["spatial"]] <- as.matrix(all_coords)
+          adata$obs[["library_id"]] <- library_ids$`library_id`
+        } else {
+          for (img_names in imageNames) {
+            result <- Gain_spatial(object = object, img.name = img_names, adata = adata)
+          }
           spatial_coords <- result[["sp_coords"]]
-          all_coords <- rbind(spatial_coords, all_coords)
           library_id <- result[["library_id"]]
-          library_ids <- rbind(library_id, library_ids)
+          adata <- result[["adata"]]
+          adata$obsm[["spatial"]] <- as.matrix(spatial_coords)
+          adata$obs[["library_id"]] <- library_id$`library_id`
         }
-        adata <- result[["adata"]]
-        ## filter the object
-        all_coords <- all_coords[rownames(adata$`obs`), ]
-        library_ids <- library_ids[rownames(adata$`obs`), ]
-        adata$obsm[["spatial"]] <- as.matrix(all_coords)
-        adata$obs[["library_id"]] <- library_ids$`library_id`
-      } else if (length(imageNames) >= 1) {
-      for (img_names in imageNames) {
-        result <- Gain_spatial(object = object, img.name = img_names, adata = adata)
+      } else {
+        message("Object has no image informations")
       }
-      spatial_coords <- result[["sp_coords"]]
-      library_id <- result[["library_id"]]
-      adata <- result[["adata"]]
-      adata$obsm[["spatial"]] <- as.matrix(spatial_coords)
-      adata$obs[["library_id"]] <- library_id$`library_id`
-    } else {
-      message("Object has no image informations")
-    }
 
-
+    
     # Add marker data
     if (!is.null(markersDF) && !is.null(markersDF[[assays[i]]])) {
       adata$uns[["markers"]] <- markersDF[[assays[i]]]
